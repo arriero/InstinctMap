@@ -1,6 +1,8 @@
 # Imagen nativa de producción para Google Cloud Run.
 FROM quay.io/quarkus/ubi9-quarkus-mandrel-builder-image:jdk-21 AS build
 
+USER root
+RUN mkdir -p /code && chown -R quarkus:quarkus /code
 USER quarkus
 WORKDIR /code
 COPY --chown=quarkus:quarkus pom.xml /code/pom.xml
@@ -9,7 +11,7 @@ COPY --chown=quarkus:quarkus .mvn /code/.mvn
 RUN ./mvnw --batch-mode org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
 
 COPY --chown=quarkus:quarkus src /code/src
-RUN ./mvnw --batch-mode package -Pnative -DskipTests
+RUN ./mvnw --batch-mode package -Dnative -DskipTests
 
 FROM quay.io/quarkus/ubi9-quarkus-micro-image:2.0
 WORKDIR /work/
