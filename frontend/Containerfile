@@ -1,0 +1,5 @@
+FROM registry.access.redhat.com/ubi9/nginx-124:latest
+COPY --chown=1001:0 frontend/ /usr/share/nginx/html/
+COPY --chown=1001:0 nginx/default.conf /opt/app-root/etc/nginx.default.d/default.conf
+USER 1001
+EXPOSE 8080

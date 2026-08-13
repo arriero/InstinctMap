@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Diagnóstico anónimo para visualizar qué áreas de tu vida alimentan tus instintos esenciales.">
+  <meta name="color-scheme" content="light dark">
+  <title>Instinct Map | Coaching Tool</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" type="module"></script>
+</head>
+<body>
+  <aside class="privacy-bar" aria-label="Privacidad">
+    <span aria-hidden="true">◆</span>
+    <span>Anónimo, sin solicitud de login y sin cookies. Tus notas personales nunca salen de este navegador.</span>
+  </aside>
+  <main class="app-shell">
+    <header class="page-header">
+      <p class="eyebrow">Diagnóstico personal</p>
+      <h1>Instinct Map | Coaching Tool</h1>
+      <p class="lede">Este mapa conecta las áreas de tu vida —trabajo, pareja, familia, hobbies— con los <strong>instintos</strong>: ocho necesidades psicológicas que todos tenemos, como sentirte capaz, pertenecer a algo o que tus decisiones vengan de ti y no de lo que otros esperan. Selecciona qué áreas alimentan cada instinto y, en menos de dos minutos, vas a ver dos cosas: qué está funcionando bien en tu vida y qué necesidad esencial no tiene ninguna fuente que la sostenga.</p>
+      <section class="instinct-glossary" aria-labelledby="glossary-title">
+        <p id="glossary-title">¿Qué son los instintos?</p>
+        <div>
+          <article><h2>Autonomía</h2><p>Que tus decisiones vengan genuinamente de ti, no de una exigencia externa.</p></article>
+          <article><h2>Competente</h2><p>Sentirte capaz: crear o dominar algo, o medirte y ganar frente a un estándar.</p></article>
+          <article><h2>Relación</h2><p>Sentirte cerca de alguien: mostrar lo no resuelto, ser elegido o pertenecer a un grupo.</p></article>
+          <article><h2>Trascendencia</h2><p>Que lo que haces importe más allá de ti.</p></article>
+          <article><h2>Provisión</h2><p>La base económica que sostiene tu vida.</p></article>
+          <article><h2>Vitalidad</h2><p>La base física: cuerpo, energía y descanso.</p></article>
+        </div>
+      </section>
+      <section class="example-section" aria-labelledby="example-title">
+        <div class="example-copy">
+          <p class="eyebrow">Ejemplo — No es tu diagnóstico</p>
+          <h2 id="example-title">Así se ve un mapa completo</h2>
+          <p>Antes de empezar, mira cómo queda cuando alguien más lo termina. La mayoría de las áreas quedan conectadas con dos o tres instintos — no solo una o dos áreas sueltas. Casi todas las áreas tienen varias líneas. Eso es lo esperado: la mayoría de tus áreas de vida alimentan más de un instinto a la vez.</p>
+          <p>Trascendencia se quedó sin ninguna línea. Esa persona no tiene, hoy, ninguna fuente que le dé sentido de propósito más allá de sí misma. Ese es un hueco real — el tipo de hallazgo que este diagnóstico está hecho para mostrarte.</p>
+        </div>
+        <figure class="example-map">
+          <img src="/assets/mapa-ejemplo.png" alt="Ejemplo completo de un mapa con varias áreas conectadas a diferentes instintos y Trascendencia sin conexiones.">
+        </figure>
+      </section>
+      <div class="map-guide" aria-label="Cómo usar el mapa">
+        <p>Cómo funciona</p>
+        <ol>
+          <li>Configura tus áreas: usa el <strong>−</strong> para eliminar las que no tienes activas y el recuadro <strong>+</strong> inferior para crear las que te faltan.</li>
+          <li>Selecciona un área.</li>
+          <li>Conéctala con los instintos que alimenta usando el <strong>+</strong> de cada instinto.</li>
+          <li>Lee en la columna derecha las orientaciones y ejemplos típicos de esa área.</li>
+          <li>Revisa debajo del mapa las conexiones que definiste y agrega tus notas personales de autorreflexión.</li>
+          <li>Descarga el diagnóstico para consultarlo en el futuro.</li>
+        </ol>
+      </div>
+    </header>
+
+    <section class="diagnostic" aria-label="Mapa de áreas e instintos">
+      <div class="map-panel">
+        <div class="map-toolbar">
+          <h2>Áreas</h2>
+          <h2 class="instincts-heading">Instintos</h2>
+        </div>
+        <div id="flow-map" class="flow-map">
+          <svg id="ribbons" class="ribbons" aria-hidden="true"></svg>
+          <div id="areas-column" class="flow-column areas-column" aria-label="Áreas de vida"></div>
+          <div id="instincts-column" class="flow-column instincts-column" aria-label="Instintos"></div>
+        </div>
+      </div>
+
+      <aside id="inspector" class="inspector" aria-live="polite" hidden>
+        <div id="inspector-content"></div>
+      </aside>
+    </section>
+
+    <section id="personal-note" class="personal-note" hidden>
+      <p class="eyebrow">Tu reflexión</p>
+      <h2 id="note-title">Personal</h2>
+      <div class="reflection-layout">
+        <aside class="guidance-card">
+          <p>Conexiones que definiste para esta área</p>
+          <ul id="area-guidance" class="guidance-list"></ul>
+        </aside>
+        <div class="reflection-writing">
+          <label class="visually-hidden" for="note-input">Escribe tu nota personal</label>
+          <textarea id="note-input" rows="9" placeholder="Escribe qué representa esta área para ti…"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="submission" aria-labelledby="finish-title">
+      <div>
+        <p class="eyebrow">Cuando el mapa te represente</p>
+        <h2 id="finish-title">Descargar tu diagnóstico</h2>
+        <p>Al descargar el PDF compartes anónimamente las conexiones de tu mapa y, solo si quieres responderlos, los datos de contexto de este formulario. Las notas y nombres personales se incluyen en tu PDF, pero nunca se envían.</p>
+      </div>
+      <form id="diagnostic-form">
+        <label for="age-range">Rango de edad <span class="optional">Opcional</span></label>
+        <select id="age-range">
+          <option value="">Prefiero no responder</option>
+          <option value="18-24">18–24</option>
+          <option value="25-34">25–34</option>
+          <option value="35-44">35–44</option>
+          <option value="45-54">45–54</option>
+          <option value="55-64">55–64</option>
+          <option value="65+">65 o más</option>
+        </select>
+        <label for="gender">Género <span class="optional">Opcional</span></label>
+        <select id="gender">
+          <option value="">Prefiero no responder</option>
+          <option value="mujer">Mujer</option>
+          <option value="hombre">Hombre</option>
+          <option value="no-binario">No binario</option>
+          <option value="otro">Otro</option>
+        </select>
+        <fieldset>
+          <legend>Momento de vida <span class="optional">Opcional · puedes marcar varios</span></legend>
+          <div class="choice-grid">
+            <label><input type="checkbox" name="life-moment" value="cambio-trabajo"> Cambio de trabajo</label>
+            <label><input type="checkbox" name="life-moment" value="separacion"> Separación</label>
+            <label><input type="checkbox" name="life-moment" value="nuevo-hijo"> Nuevo hijo</label>
+            <label><input type="checkbox" name="life-moment" value="mudanza"> Mudanza</label>
+            <label><input type="checkbox" name="life-moment" value="duelo"> Duelo</label>
+            <label><input type="checkbox" name="life-moment" value="cambio-salud"> Cambio de salud</label>
+            <label><input type="checkbox" name="life-moment" value="jubilacion"> Jubilación</label>
+            <label><input type="checkbox" name="life-moment" value="ninguno"> Ninguno de estos</label>
+          </div>
+        </fieldset>
+        <label for="region">País o región <span class="optional">Opcional</span></label>
+        <input id="region" maxlength="80" autocomplete="country-name" placeholder="Ej. Colombia">
+        <fieldset>
+          <legend>¿Es un rediagnóstico? <span class="optional">Opcional</span></legend>
+          <div class="radio-row">
+            <label><input type="radio" name="rediagnosis" value="true"> Sí</label>
+            <label><input type="radio" name="rediagnosis" value="false"> No</label>
+          </div>
+        </fieldset>
+        <button class="primary-button" type="submit">Descargar PDF con diagnóstico</button>
+        <p id="form-status" class="form-status" role="status"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <p>Instinct Map | Coaching Tool</p>
+      <a href="/acerca-de.html">Acerca de la herramienta y su marco teórico <span aria-hidden="true">→</span></a>
+    </div>
+  </footer>
+
+  <dialog id="area-dialog">
+    <form id="area-form" method="dialog">
+      <div class="dialog-header">
+        <p class="eyebrow">Tu mapa</p>
+        <h2>Nueva área</h2>
+      </div>
+      <label for="area-type">Tipo</label>
+      <select id="area-type"></select>
+      <label for="area-name">Nombre personal</label>
+      <input id="area-name" maxlength="60" autocomplete="off" placeholder="Ej. Arriero Works">
+      <p class="field-hint">El nombre solo vive en esta pestaña y nunca se envía al guardar el diagnóstico.</p>
+      <div class="dialog-actions">
+        <button id="cancel-area" class="text-button" type="button">Cancelar</button>
+        <button class="primary-button" type="submit">Crear</button>
+      </div>
+    </form>
+  </dialog>
+
+  <noscript>Esta herramienta necesita JavaScript para dibujar y editar tu mapa. No usa JavaScript de terceros.</noscript>
+</body>
+</html>
