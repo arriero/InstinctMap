@@ -73,3 +73,10 @@ Antes de publicar:
 5. Construir el backend nativo (`mvn package -Dnative`) y usar `Dockerfile.native` si el runner dispone de GraalVM/Mandrel.
 
 La versión está fijada a Quarkus 3.33.3, LTS vigente al iniciar el proyecto en agosto de 2026.
+
+## Google Cloud
+
+- `backend/Dockerfile`: compilación nativa con Mandrel y ejecución sobre UBI Micro para Cloud Run.
+- `frontend/firebase.json`: Firebase Hosting con proxy `/api/**` hacia `instinct-map-api` en `us-central1`.
+- Secret Manager debe exponer `DATABASE_URL` como una URL JDBC completa de Neon.
+- Si el servicio o la región de Cloud Run cambian, actualizar `frontend/firebase.json` antes del despliegue.
