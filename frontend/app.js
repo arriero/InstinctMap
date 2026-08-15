@@ -351,6 +351,7 @@ function selectInstinct(id) {
 }
 
 function setMobileInspectorOpen(open) {
+  if (open && !document.querySelector('[data-accordion-section="3"]')?.classList.contains("is-open")) return;
   diagnostic.classList.toggle("mobile-inspector-open", open);
   mobileInspectorToggle?.setAttribute("aria-expanded", String(open));
 }

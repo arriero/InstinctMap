@@ -422,8 +422,9 @@ dialog { border: 1px solid var(--border-card); background: var(--bg-card); }
   .mobile-inspector-toggle { position: sticky; z-index: 4; top: 12px; display: block; justify-self: end; margin: 0 0 -34px; padding: 7px 11px; border: 1px solid var(--rule); border-radius: 999px; color: var(--accent); background: color-mix(in srgb, var(--bg-card) 94%, transparent); box-shadow: 0 4px 16px rgba(26, 26, 26, .08); font-size: .78rem; }
   .mobile-inspector-toggle[aria-expanded="true"] { color: white; border-color: var(--accent); background: var(--accent); }
   .mobile-inspector-close { position: sticky; z-index: 2; top: 0; display: grid; place-items: center; width: 30px; height: 30px; margin: -8px 0 4px auto; border: 0; border-radius: 50%; color: var(--text-meta); background: var(--bg-card); font-size: 1.45rem; line-height: 1; }
-  .inspector { position: fixed; z-index: 30; inset: 50% 10px auto auto; width: min(88vw, 420px); height: auto; max-height: 56vh; margin: 0; padding: 18px 20px 24px; overflow-y: auto; border: 1px solid var(--border-card); border-right: 0; border-radius: 4px 0 0 4px; background: var(--bg-card); box-shadow: -18px 18px 48px rgba(26, 26, 26, .2); transform: translate(calc(100% + 24px), -50%); visibility: hidden; transition: transform .22s ease, visibility .22s ease; }
-  .diagnostic.mobile-inspector-open .inspector { transform: translate(0, -50%); visibility: visible; }
+  .inspector { position: fixed; z-index: 30; inset: 50% 10px auto auto; width: min(88vw, 420px); height: auto; max-height: 56vh; margin: 0; padding: 18px 20px 24px; overflow-y: auto; border: 1px solid var(--border-card); border-right: 0; border-radius: 4px 0 0 4px; background: var(--bg-card); box-shadow: -18px 18px 48px rgba(26, 26, 26, .2); transform: translateY(-50%); }
+  .diagnostic:not(.mobile-inspector-open) .inspector { display: none !important; }
+  .diagnostic.mobile-inspector-open .inspector { display: block; }
   .map-step:not(.is-open) .inspector,
   .map-step:not(.is-open) .mobile-inspector-toggle { display: none; }
   .map-guide-lists { grid-template-columns: 1fr; gap: 0; }
