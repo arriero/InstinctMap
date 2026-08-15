@@ -157,7 +157,9 @@ Los colores viven en texto, checkboxes y cintas, no en fondos tintados.
 ## 11. Responsive
 
 - Bajo 860 px, ejemplo y descarga pasan a una columna.
-- El inspector del Sankey pasa debajo o a panel móvil según las reglas actuales.
+- En escritorio, el inspector del Sankey sigue siendo la columna editorial derecha del mapa.
+- Bajo 860 px, el inspector no ocupa espacio dentro del flujo ni puede aparecer mientras la persona está en el paso 2. Solo está disponible dentro del paso 3 mediante el botón “Orientación”.
+- En móvil, “Orientación” abre un cajón flotante desde el borde derecho, de máximo 56% de la altura visible y hasta 88% del ancho. Incluye cierre explícito, se abre al seleccionar un área o instinto y se cierra automáticamente al salir del mapa.
 - La guía “Cómo funciona” pasa de dos columnas a una.
 - Bajo 580 px, grillas de selección reducen columnas y el mapa puede hacer scroll horizontal dentro de su contenedor.
 
@@ -172,4 +174,3 @@ Los colores viven en texto, checkboxes y cintas, no en fondos tintados.
 - Cierre automático de etapas anteriores.
 - Sección independiente para el ejemplo.
 - Link de contacto sin un canal aprobado.
-

@@ -148,4 +148,4 @@ El backend se construye desde `backend/Dockerfile`. Cloud Run debe escuchar `POR
 4. Si cambia el cálculo de huecos, mantener frontend, PDF y backend idénticos.
 5. Verificar escritorio y móvil; el Sankey usa medición DOM y se redibuja con `ResizeObserver`.
 6. No asumir que un deploy de Hosting actualiza Cloud Run: son despliegues independientes.
-
+7. El inspector móvil del Sankey depende de las clases `mobile-inspector-open` y `is-open`, de los controles `mobile-inspector-toggle` / `mobile-inspector-close` y de un `IntersectionObserver`; no convertirlo de nuevo en una columna fija o una hoja inferior global.

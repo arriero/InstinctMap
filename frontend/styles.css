@@ -359,6 +359,8 @@ input::placeholder, textarea::placeholder { color: var(--text-meta); }
 .map-guide li { margin-bottom: 10px; }
 .diagnostic { min-height: 620px; margin-top: 40px; padding: clamp(22px, 3vw, 30px); border: 1px solid var(--border-card); border-radius: 4px; background: var(--bg-card); }
 .diagnostic.has-inspector { grid-template-columns: minmax(0, 1fr) var(--inspector-width); }
+.mobile-inspector-toggle,
+.mobile-inspector-close { display: none; }
 .flow-map { max-width: 940px; }
 .map-toolbar h2 { color: var(--text-meta); font-family: var(--sans); font-size: .78rem; font-weight: 500; }
 .flow-chip { min-height: 38px; border: 0; color: var(--text-title); background: transparent; font-size: 1.04rem; }
@@ -415,8 +417,15 @@ dialog { border: 1px solid var(--border-card); background: var(--bg-card); }
   .accordion-content { padding-left: 0; }
   .changed-area-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .example-layout, .submission-layout { grid-template-columns: 1fr; }
-  .diagnostic.has-inspector { grid-template-columns: 1fr; }
-  .inspector { background: var(--bg-card); }
+  .diagnostic,
+  .diagnostic.has-inspector { position: relative; grid-template-columns: 1fr; }
+  .mobile-inspector-toggle { position: sticky; z-index: 4; top: 12px; display: block; justify-self: end; margin: 0 0 -34px; padding: 7px 11px; border: 1px solid var(--rule); border-radius: 999px; color: var(--accent); background: color-mix(in srgb, var(--bg-card) 94%, transparent); box-shadow: 0 4px 16px rgba(26, 26, 26, .08); font-size: .78rem; }
+  .mobile-inspector-toggle[aria-expanded="true"] { color: white; border-color: var(--accent); background: var(--accent); }
+  .mobile-inspector-close { position: sticky; z-index: 2; top: 0; display: grid; place-items: center; width: 30px; height: 30px; margin: -8px 0 4px auto; border: 0; border-radius: 50%; color: var(--text-meta); background: var(--bg-card); font-size: 1.45rem; line-height: 1; }
+  .inspector { position: fixed; z-index: 30; inset: 50% 10px auto auto; width: min(88vw, 420px); height: auto; max-height: 56vh; margin: 0; padding: 18px 20px 24px; overflow-y: auto; border: 1px solid var(--border-card); border-right: 0; border-radius: 4px 0 0 4px; background: var(--bg-card); box-shadow: -18px 18px 48px rgba(26, 26, 26, .2); transform: translate(calc(100% + 24px), -50%); visibility: hidden; transition: transform .22s ease, visibility .22s ease; }
+  .diagnostic.mobile-inspector-open .inspector { transform: translate(0, -50%); visibility: visible; }
+  .map-step:not(.is-open) .inspector,
+  .map-step:not(.is-open) .mobile-inspector-toggle { display: none; }
   .map-guide-lists { grid-template-columns: 1fr; gap: 0; }
 }
 

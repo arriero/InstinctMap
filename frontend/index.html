@@ -141,6 +141,7 @@
       </div>
 
       <section class="diagnostic" aria-label="Mapa de áreas e instintos">
+        <button id="mobile-inspector-toggle" class="mobile-inspector-toggle" type="button" aria-controls="inspector" aria-expanded="false">Orientación</button>
         <div class="map-panel">
           <div class="map-toolbar"><h2>Áreas</h2><h2 class="instincts-heading">Instintos</h2></div>
           <div id="flow-map" class="flow-map">
@@ -149,7 +150,10 @@
             <div id="instincts-column" class="flow-column instincts-column" aria-label="Instintos"></div>
           </div>
         </div>
-        <aside id="inspector" class="inspector" aria-live="polite" hidden><div id="inspector-content"></div></aside>
+        <aside id="inspector" class="inspector" aria-live="polite" hidden>
+          <button id="mobile-inspector-close" class="mobile-inspector-close" type="button" aria-label="Cerrar orientación">×</button>
+          <div id="inspector-content"></div>
+        </aside>
       </section>
       </div>
     </section>

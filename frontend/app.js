@@ -141,6 +141,8 @@ const instinctsColumn = qs("#instincts-column");
 const ribbons = qs("#ribbons");
 const inspector = qs("#inspector");
 const inspectorContent = qs("#inspector-content");
+const mobileInspectorToggle = qs("#mobile-inspector-toggle");
+const mobileInspectorClose = qs("#mobile-inspector-close");
 const noteSection = qs("#personal-note");
 const noteInput = qs("#note-input");
 const changedAreaOptions = qs("#changed-area-options");
@@ -339,12 +341,31 @@ function selectArea(id) {
   state.selection = { kind: "area", id };
   state.expandedInstinct = null;
   render();
+  if (window.matchMedia("(max-width: 860px)").matches) setMobileInspectorOpen(true);
 }
 
 function selectInstinct(id) {
   state.selection = { kind: "instinct", id };
   render();
+  if (window.matchMedia("(max-width: 860px)").matches) setMobileInspectorOpen(true);
 }
+
+function setMobileInspectorOpen(open) {
+  diagnostic.classList.toggle("mobile-inspector-open", open);
+  mobileInspectorToggle?.setAttribute("aria-expanded", String(open));
+}
+
+mobileInspectorToggle?.addEventListener("click", () => {
+  setMobileInspectorOpen(!diagnostic.classList.contains("mobile-inspector-open"));
+});
+mobileInspectorClose?.addEventListener("click", () => setMobileInspectorOpen(false));
+window.addEventListener("resize", () => {
+  if (!window.matchMedia("(max-width: 860px)").matches) setMobileInspectorOpen(false);
+});
+
+new IntersectionObserver(([entry]) => {
+  if (!entry.isIntersecting && window.matchMedia("(max-width: 860px)").matches) setMobileInspectorOpen(false);
+}, { threshold: 0.08 }).observe(diagnostic);
 
 function renderInspector() {
   if (!state.selection) {
