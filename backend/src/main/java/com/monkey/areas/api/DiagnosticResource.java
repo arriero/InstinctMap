@@ -81,6 +81,10 @@ public class DiagnosticResource {
         request.areas().forEach(area -> connected.addAll(area.instinctIds()));
         Set<String> expectedMissing = new HashSet<>(InstinctIds.ALL);
         expectedMissing.removeAll(connected);
+        if (connected.contains("construir") || connected.contains("competir")) {
+            expectedMissing.remove("construir");
+            expectedMissing.remove("competir");
+        }
         if (!expectedMissing.equals(new HashSet<>(request.unsupportedInstinctIds()))) {
             throw new WebApplicationException("Los instintos sin área no coinciden con las conexiones", 422);
         }

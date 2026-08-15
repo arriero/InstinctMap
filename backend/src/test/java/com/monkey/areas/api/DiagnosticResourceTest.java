@@ -24,4 +24,11 @@ class DiagnosticResourceTest {
             {"schemaVersion":3,"ageRange":null,"gender":null,"lifeMoments":[],"countryOrRegion":null,"rediagnosis":null,"areas":[{"type":"Personal","instinctIds":[]}],"unsupportedInstinctIds":[],"turnstileToken":null}
             """).when().post("/api/v1/diagnostics").then().statusCode(422);
     }
+
+    @Test
+    void acceptsEitherCompetenceRouteAsSupportForBoth() {
+        given().contentType("application/json").body("""
+            {"schemaVersion":3,"ageRange":null,"gender":null,"lifeMoments":[],"countryOrRegion":null,"rediagnosis":null,"areas":[{"type":"Personal","instinctIds":["construir"]}],"unsupportedInstinctIds":["vitalidad","provision","intimidad","vinculo","pertenencia","autonomia","trascendencia"],"turnstileToken":null}
+            """).when().post("/api/v1/diagnostics").then().statusCode(201).body("id", notNullValue());
+    }
 }

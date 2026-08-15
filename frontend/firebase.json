@@ -11,8 +11,8 @@
       {
         "source": "/api/**",
         "run": {
-          "serviceId": "instinct-map-api",
-          "region": "us-central1"
+          "serviceId": "instinctmap",
+          "region": "us-east1"
         }
       },
       {

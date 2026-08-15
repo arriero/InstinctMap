@@ -1,2 +1,4 @@
-.env
 backend/target/
+.env
+.env.local
+.firebase/

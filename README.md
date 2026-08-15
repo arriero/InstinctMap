@@ -1,4 +1,4 @@
-# Instinct Map | Coaching Tool
+# Instinct Map
 
 Aplicación web independiente para crear un diagnóstico visual y anónimo de las áreas de vida y las necesidades psicológicas que alimentan.
 
@@ -77,6 +77,6 @@ La versión está fijada a Quarkus 3.33.3, LTS vigente al iniciar el proyecto en
 ## Google Cloud
 
 - `backend/Dockerfile`: compilación multietapa y ejecución JVM sobre UBI OpenJDK 21 para Cloud Run.
-- `frontend/firebase.json`: Firebase Hosting con proxy `/api/**` hacia `instinct-map-api` en `us-central1`.
+- `frontend/firebase.json`: Firebase Hosting con proxy `/api/**` hacia `instinctmap` en `us-east1`.
 - Secret Manager debe exponer `DATABASE_URL` como una URL JDBC completa de Neon.
 - Si el servicio o la región de Cloud Run cambian, actualizar `frontend/firebase.json` antes del despliegue.

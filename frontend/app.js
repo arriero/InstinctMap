@@ -81,6 +81,7 @@ const instincts = [
 
 const repeatableAreaTypes = ["Trabajo / Oficio", "Estudio", "Hobby", "Comunidad", "Voluntariado", "Apoyo Profesional"];
 const initialAreaTypes = ["Personal", "Familia", "Pareja", "Amigos Cercanos", "Trabajo / Oficio", "Estudio", "Hobby", "Comunidad", "Voluntariado", "Apoyo Profesional"];
+const protectedAreaTypes = new Set(["Personal", "Familia"]);
 const guidance = {
   Personal: "Este es el único espacio donde tú eres simultáneamente la fuente y el destino. (Vitalidad) El ejercicio, el sueño y la alimentación que sostienes por tu propio criterio construyen la base física desde la que todo lo demás opera. (Autonomía) El tiempo sin agenda — leer lo que nadie te recomendó, explorar sin destino, crear sin audiencia — es donde la sensación de que tu vida viene de ti se recupera. (Competente) Aprender algo por curiosidad propia, dominar una habilidad sin que nadie te lo pida, construir algo que solo existe porque tú quisiste que existiera.",
   Pareja: "(Vínculo) Ser elegido todos los días por alguien que te conoce bien es una forma de pertenencia que ningún otro vínculo replica exactamente. (Intimidad) La vulnerabilidad compartida — mostrar lo que no está resuelto y que el otro lo reciba sin intentar resolverlo — es lo que convierte la convivencia en conexión real.",
@@ -95,10 +96,40 @@ const guidance = {
   Voluntariado: "(Trascendencia) Contribuir sin retribución hace visible el efecto en otros. (Pertenencia) Suele existir una comunidad regular. (Autonomía) Al elegirse libremente, expresa tus propios valores."
 };
 
+const instinctPrompt = {
+  vitalidad: "Contar con energía corporal, descanso y recuperación para sostener tu vida. Es la base física desde la que todo lo demás opera: sin ella, hasta las áreas que sí están funcionando bien terminan costando más de lo que deberían.",
+  autonomia: "Sentir que eliges y que tus decisiones vienen genuinamente de ti, no de una exigencia externa que solo estás cumpliendo. Se nota más en el tiempo sin agenda: lo que haces sin que nadie te lo pida ni te lo recomiende.",
+  construir: "Sentirte capaz porque algo cambió o existe gracias a lo que hiciste. El progreso es acumulativo: lo que sabes o puedes hacer hoy, y no podías hace seis meses, es evidencia tangible de que algo en ti se transformó.",
+  trascendencia: "Sentir que lo que haces importa más allá de ti y tiene un para qué. Se reconoce en lo que aportas sin necesitar que lleve tu nombre: lo que va a seguir sirviendo cuando tú ya no estés para verlo.",
+  competir: "Medirte frente a un estándar, un marcador o un resultado externo —un cronómetro, un ranking, un objetivo con número. No se trata necesariamente de ganarle a alguien, sino de tener una forma clara de saber si lo lograste.",
+  intimidad: "Poder mostrar lo no resuelto —lo que todavía te cuesta, lo que preferirías que nadie viera— y que el otro lo reciba sin intentar arreglarlo ni usarlo en tu contra. Es la vulnerabilidad compartida, no la cantidad de tiempo juntos, lo que convierte la cercanía en algo real.",
+  vinculo: "Ser elegido y conocido por alguien más allá de un contexto o función —no como el compañero de trabajo o el vecino, sino como tú. Es lo que sostienen las personas que saben quién eras antes de quien eres ahora.",
+  pertenencia: "Formar parte de un grupo donde tu presencia importa y tu ausencia se nota. No basta con asistir una vez: son los rituales que se repiten, la razón para seguir apareciendo, lo que sostiene el sentido de pertenecer a algo más grande que tú.",
+  provision: "Tener estabilidad material y la certeza de que hay suficiente para continuar. Es la base más visible de todas, la que se nota primero cuando falta —pero por sí sola no sostiene el resto: solo te da el terreno desde donde ocuparte de lo demás."
+};
+
+const impactProfiles = {
+  Personal: { typical: ["vitalidad", "autonomia", "construir"], possible: ["trascendencia", "competir", "intimidad", "vinculo", "pertenencia", "provision"] },
+  Familia: { typical: ["vinculo", "pertenencia", "construir"], possible: ["intimidad", "provision", "vitalidad", "trascendencia", "autonomia", "competir"] },
+  Pareja: { typical: ["vinculo", "intimidad"], possible: ["pertenencia", "construir", "provision", "vitalidad", "autonomia", "trascendencia", "competir"] },
+  "Amigos Cercanos": { typical: ["vinculo", "intimidad"], possible: ["pertenencia", "vitalidad", "autonomia", "trascendencia", "construir", "competir", "provision"] },
+  "Trabajo / Oficio": { typical: ["provision", "construir", "pertenencia"], possible: ["competir", "autonomia", "trascendencia", "vinculo", "vitalidad", "intimidad"] },
+  Estudio: { typical: ["construir", "autonomia"], possible: ["competir", "pertenencia", "trascendencia", "provision", "vinculo", "vitalidad", "intimidad"] },
+  Hobby: { typical: ["autonomia", "construir", "vitalidad"], possible: ["competir", "pertenencia", "vinculo", "trascendencia", "intimidad", "provision"] },
+  Comunidad: { typical: ["pertenencia", "vinculo"], possible: ["competir", "construir", "trascendencia", "intimidad", "autonomia", "vitalidad", "provision"] },
+  Voluntariado: { typical: ["trascendencia", "pertenencia"], possible: ["autonomia", "vinculo", "construir", "intimidad", "vitalidad", "competir", "provision"] },
+  "Apoyo Profesional": { typical: ["intimidad", "autonomia"], possible: ["vinculo", "vitalidad", "construir", "trascendencia", "pertenencia", "provision", "competir"] },
+  Otra: { typical: [], possible: instincts.map(item => item.id) }
+};
+
 const state = {
-  areas: initialAreaTypes.map(type => ({ id: crypto.randomUUID(), type, name: type, fixed: !repeatableAreaTypes.includes(type), active: true, instincts: [], note: "" })),
+  areas: initialAreaTypes.map(type => ({ id: crypto.randomUUID(), type, name: type, fixed: protectedAreaTypes.has(type), active: true, instincts: [], note: "" })),
   selection: null,
-  expandedInstinct: null
+  expandedInstinct: null,
+  changedAreaType: null,
+  changedAreaName: "",
+  impactedInstincts: [],
+  reflection: ""
 };
 state.selection = { kind: "area", id: state.areas[0].id };
 
@@ -112,33 +143,160 @@ const inspector = qs("#inspector");
 const inspectorContent = qs("#inspector-content");
 const noteSection = qs("#personal-note");
 const noteInput = qs("#note-input");
+const changedAreaOptions = qs("#changed-area-options");
+const otherAreaField = qs("#other-area-field");
+const changedAreaName = qs("#changed-area-name");
+const impactPicker = qs("#impact-picker");
+const exampleSection = qs(".example-section");
+qs('[data-accordion-section="2"] .accordion-content').append(exampleSection);
+const accordionSections = [...document.querySelectorAll("[data-accordion-section]")];
 
 function escapeHtml(value = "") {
   return value.replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
 }
 
+function isInstinctSupported(instinctId, areas = state.areas.filter(area => area.active)) {
+  if (instinctId === "construir" || instinctId === "competir") {
+    return areas.some(area => area.instincts.includes("construir") || area.instincts.includes("competir"));
+  }
+  return areas.some(area => area.instincts.includes(instinctId));
+}
+
 function render() {
+  renderChangeStep();
   renderColumns();
   renderInspector();
+  renderAccordionSummaries();
   requestAnimationFrame(drawRibbons);
+}
+
+function openAccordionSection(sectionNumber, { focus = false } = {}) {
+  const active = accordionSections.find(section => section.dataset.accordionSection === String(sectionNumber));
+  if (!active) return;
+  active.classList.add("is-open");
+  const header = active.querySelector(".accordion-header");
+  const content = active.querySelector(":scope > .accordion-content");
+  header.setAttribute("aria-expanded", "true");
+  header.querySelector(".accordion-indicator").textContent = "✓";
+  content.hidden = false;
+  if (focus) active?.querySelector(".accordion-header")?.focus({ preventScroll: true });
+  if (String(sectionNumber) === "3") requestAnimationFrame(drawRibbons);
+}
+
+accordionSections.forEach(section => {
+  section.querySelector(".accordion-header").addEventListener("click", () => {
+    openAccordionSection(section.dataset.accordionSection);
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+});
+
+function renderAccordionSummaries() {
+  const changedSummary = qs('[data-summary="1"]');
+  const impactSummary = qs('[data-summary="2"]');
+  const mapSummary = qs('[data-summary="3"]');
+  const noteSummary = qs('[data-summary="4"]');
+  if (changedSummary) changedSummary.textContent = state.changedAreaType
+    ? (state.changedAreaType === "Otra" ? state.changedAreaName.trim() || "Otra área" : state.changedAreaType)
+    : "Sin responder";
+  if (impactSummary) {
+    const names = state.impactedInstincts.map(id => instincts.find(item => item.id === id)?.name).filter(Boolean);
+    impactSummary.textContent = names.length ? names.join(", ") : "Sin responder";
+  }
+  if (mapSummary) {
+    const activeAreas = state.areas.filter(area => area.active);
+    const connections = activeAreas.reduce((total, area) => total + area.instincts.length, 0);
+    mapSummary.textContent = `${activeAreas.length} áreas activas · ${connections} conexiones`;
+  }
+  if (noteSummary) noteSummary.textContent = state.reflection.trim() ? "Reflexión registrada" : "Tu reflexión";
+}
+
+function renderChangeStep() {
+  const choices = [...initialAreaTypes.filter(type => !protectedAreaTypes.has(type)), "Otra"];
+  changedAreaOptions.innerHTML = choices.map(type => `<button class="changed-area-card ${state.changedAreaType === type ? "selected" : ""}" type="button" role="radio" aria-checked="${state.changedAreaType === type}" data-changed-area="${escapeHtml(type)}">${escapeHtml(type)}</button>`).join("");
+  changedAreaOptions.querySelectorAll("[data-changed-area]").forEach(button => button.addEventListener("click", () => selectChangedArea(button.dataset.changedArea)));
+  otherAreaField.hidden = state.changedAreaType !== "Otra";
+  impactPicker.hidden = !state.changedAreaType;
+  if (!state.changedAreaType) return;
+  const profile = impactProfiles[state.changedAreaType] ?? impactProfiles.Otra;
+  renderImpactGroup(qs("#typical-instincts"), "Conexiones típicas de esta área", "Lo que esta área suele alimentar en la mayoría de las personas.", profile.typical);
+  renderImpactGroup(qs("#possible-instincts"), "Menos frecuentes, pero posibles", "Menos comunes, pero reales para mucha gente. Vale la pena leerlas antes de descartarlas.", profile.possible);
+}
+
+function renderImpactGroup(container, title, subtitle, ids) {
+  container.hidden = ids.length === 0;
+  container.innerHTML = ids.length ? `<div class="impact-group-heading"><h4>${title}</h4><p>${subtitle}</p></div>${ids.map(id => impactOption(instincts.find(item => item.id === id))).join("")}` : "";
+  container.querySelectorAll("[data-impact-instinct]").forEach(button => button.addEventListener("click", () => toggleImpactedInstinct(button.dataset.impactInstinct)));
+}
+
+function impactOption(instinct) {
+  const checked = state.impactedInstincts.includes(instinct.id);
+  return `<button class="impact-option ${checked ? "checked" : ""}" style="--instinct:${instinct.color}" type="button" role="checkbox" aria-checked="${checked}" data-impact-instinct="${instinct.id}"><span class="impact-check" aria-hidden="true">${checked ? "✓" : ""}</span><span><strong>${instinct.name}</strong><small>${escapeHtml(instinctPrompt[instinct.id])}</small></span></button>`;
+}
+
+function selectChangedArea(type) {
+  state.changedAreaType = type;
+  state.impactedInstincts = [];
+  state.changedAreaName = type === "Otra" ? "" : type;
+  changedAreaName.value = state.changedAreaName;
+  syncImpactedArea();
+  render();
+  requestAnimationFrame(() => {
+    openAccordionSection(2);
+    document.querySelector('[data-accordion-section="2"]')?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
+function toggleImpactedInstinct(id) {
+  state.impactedInstincts = state.impactedInstincts.includes(id) ? state.impactedInstincts.filter(item => item !== id) : [...state.impactedInstincts, id];
+  syncImpactedArea();
+  render();
+  if (state.impactedInstincts.length) openAccordionSection(3);
+}
+
+function syncImpactedArea() {
+  state.areas.forEach(area => {
+    if (area.impacted && !area.isChangedCustom) area.active = true;
+    area.impacted = false;
+    area.lostInstincts = [];
+  });
+  if (!state.changedAreaType) return;
+  let area;
+  if (state.changedAreaType === "Otra") {
+    area = state.areas.find(item => item.isChangedCustom);
+    if (!area) {
+      area = { id: crypto.randomUUID(), type: "Otra", name: state.changedAreaName || "Otra área", fixed: true, active: false, instincts: [], note: "", isChangedCustom: true };
+      state.areas.unshift(area);
+    }
+    area.name = state.changedAreaName.trim() || "Otra área";
+  } else {
+    state.areas = state.areas.filter(item => !item.isChangedCustom);
+    area = state.areas.find(item => item.type === state.changedAreaType);
+    if (!area) {
+      area = { id: crypto.randomUUID(), type: state.changedAreaType, name: state.changedAreaType, fixed: false, active: false, instincts: [], note: "" };
+      state.areas.unshift(area);
+    }
+  }
+  if (!area) return;
+  area.impacted = true;
+  area.active = false;
+  area.lostInstincts = [...state.impactedInstincts];
+  if (state.selection?.kind === "area" && state.selection.id === area.id) {
+    const next = state.areas.find(item => item.active);
+    state.selection = next ? { kind: "area", id: next.id } : null;
+  }
 }
 
 function renderColumns() {
   areasColumn.innerHTML = state.areas.map(area => `
-    <div class="area-node">
-      ${area.fixed ? '<span class="area-control-placeholder"></span>' : `<button class="area-remove" type="button" data-delete-area="${area.id}" aria-label="Eliminar ${escapeHtml(area.name)}"><span>−</span></button>`}
-      <button class="flow-chip area-chip ${area.active ? "" : "paused"} ${state.selection?.kind === "area" && state.selection.id === area.id ? "selected" : ""}"
-        type="button" data-area-id="${area.id}" title="${escapeHtml(area.type)}">${escapeHtml(area.name)}</button>
+    <div class="area-node ${area.impacted ? "impacted" : ""}">
+      ${area.impacted || area.fixed ? '<span class="area-control-placeholder"></span>' : `<button class="area-remove" type="button" data-delete-area="${area.id}" aria-label="Eliminar ${escapeHtml(area.name)}"><span>−</span></button>`}
+      <button class="flow-chip area-chip ${area.impacted ? "changed" : ""} ${area.active ? "" : "paused"} ${state.selection?.kind === "area" && state.selection.id === area.id ? "selected" : ""}"
+        type="button" ${area.impacted ? "disabled" : `data-area-id="${area.id}"`} title="${area.impacted ? "Área que cambió" : escapeHtml(area.type)}">${escapeHtml(area.name)}</button>
     </div>`).join("") +
     `<button class="flow-chip add-area-chip" type="button" data-add-area aria-label="Crear otra área" title="Crear otra área">+</button>`;
   const byId = id => instincts.find(instinct => instinct.id === id);
-  instinctsColumn.innerHTML = `
-    ${instinctNode(byId("trascendencia"))}
-    <section class="instinct-group"><h3>Competente</h3>${["construir", "competir"].map(id => instinctNode(byId(id))).join("")}</section>
-    ${instinctNode(byId("autonomia"))}
-    <section class="instinct-group"><h3>Relación</h3>${["pertenencia", "vinculo", "intimidad"].map(id => instinctNode(byId(id))).join("")}</section>
-    ${instinctNode(byId("provision"))}
-    ${instinctNode(byId("vitalidad"))}`;
+  instinctsColumn.innerHTML = ["trascendencia", "construir", "competir", "autonomia", "pertenencia", "vinculo", "intimidad", "provision", "vitalidad"]
+    .map(id => instinctNode(byId(id))).join("");
   areasColumn.querySelectorAll("[data-area-id]").forEach(button => button.addEventListener("click", () => selectArea(button.dataset.areaId)));
   areasColumn.querySelectorAll("[data-delete-area]").forEach(button => button.addEventListener("click", () => removeArea(button.dataset.deleteArea)));
   areasColumn.querySelector("[data-add-area]").addEventListener("click", () => { qs("#area-name").value = ""; dialog.showModal(); });
@@ -149,10 +307,12 @@ function renderColumns() {
 function instinctNode(instinct) {
   const selectedArea = state.selection?.kind === "area" ? state.areas.find(area => area.id === state.selection.id) : null;
   const connected = selectedArea?.instincts.includes(instinct.id);
-  return `<div class="instinct-node" data-instinct-id="${instinct.id}" style="--instinct:${instinct.color}">
+  const supported = isInstinctSupported(instinct.id);
+  const lostOnly = state.impactedInstincts.includes(instinct.id) && !supported;
+  return `<div class="instinct-node ${supported ? "supported" : "unsupported"} ${lostOnly ? "open-gap" : ""}" data-instinct-id="${instinct.id}" style="--instinct:${instinct.color}">
     ${selectedArea ? `<button class="map-connection ${connected ? "connected" : ""}" type="button" data-connect-instinct="${instinct.id}" aria-label="${connected ? "Quitar" : "Crear"} conexión con ${instinct.name}"><span>${connected ? "−" : "+"}</span></button>` : '<span class="connection-placeholder"></span>'}
     <button class="flow-chip instinct-chip ${state.selection?.kind === "instinct" && state.selection.id === instinct.id ? "selected" : ""}" type="button" data-select-instinct="${instinct.id}">
-      <span class="instinct-icon" aria-hidden="true">${instinct.icon}</span><span>${instinct.name}</span>
+      <span>${instinct.name}</span>
     </button>
   </div>`;
 }
@@ -167,7 +327,7 @@ function toggleConnection(instinctId) {
 
 function removeArea(areaId) {
   const area = state.areas.find(item => item.id === areaId);
-  if (!area || area.fixed) return;
+  if (!area || area.fixed || state.areas.filter(item => item.active).length <= 1) return;
   state.areas = state.areas.filter(item => item.id !== areaId);
   if (state.selection?.kind === "area" && state.selection.id === areaId) {
     state.selection = { kind: "area", id: state.areas[0].id };
@@ -190,7 +350,6 @@ function renderInspector() {
   if (!state.selection) {
     inspector.hidden = true;
     diagnostic.classList.remove("has-inspector");
-    noteSection.hidden = true;
     return;
   }
   inspector.hidden = false;
@@ -211,15 +370,6 @@ function renderAreaInspector(area) {
       ? suggestions.map(({ instinct, text }) => `<section class="orientation-example"><h3>${escapeHtml(instinct)}</h3><p>${escapeHtml(text)}</p></section>`).join("")
       : `<p class="empty-connections">${escapeHtml(orientation)}</p>`}</div>
     `;
-  noteSection.hidden = false;
-  qs("#note-title").textContent = area.name;
-  noteInput.value = area.note;
-  qs("#area-guidance").innerHTML = area.instincts.length
-    ? area.instincts.map(id => {
-      const instinct = instincts.find(item => item.id === id);
-      return `<li style="--instinct:${instinct.color}"><strong><span aria-hidden="true">${instinct.icon}</span> ${instinct.name}</strong><span>${escapeHtml(instinct.definition)}</span></li>`;
-    }).join("")
-    : '<li><span>Aún no has conectado esta área con ningún instinto. Usa los botones + del mapa para definir sus conexiones.</span></li>';
 }
 
 function parseGuidance(orientation) {
@@ -229,11 +379,14 @@ function parseGuidance(orientation) {
 
 function renderInstinctInspector(instinct) {
   if (!instinct) return closeInspector();
-  noteSection.hidden = true;
   inspector.style.setProperty("--accent", instinct.color);
+  const competenceAlternative = instinct.id === "construir" || instinct.id === "competir"
+    ? `<p class="competence-alternative">Construir y Competir son dos rutas de la misma necesidad de sentirte competente. Puedes satisfacerla por cualquiera de las dos; no necesitas tener ambas activas.</p>`
+    : "";
   inspectorContent.innerHTML = `
-    <h2 class="inspector-title"><span aria-hidden="true">${instinct.icon}</span>${instinct.name}</h2>
+    <h2 class="inspector-title">${instinct.name}</h2>
     <p class="inspector-family">${instinct.family}</p>
+    ${competenceAlternative}
     ${section("Qué es", instinct.definition)}
     ${instinct.ingredients?.length ? listSection("Ingredientes", instinct.ingredients) : ""}
     ${instinct.works ? section("Cuando funciona bien", instinct.works) : ""}
@@ -287,12 +440,44 @@ function drawRibbons() {
       ribbons.append(path);
     });
   });
+  const impactedArea = state.areas.find(area => area.impacted);
+  if (impactedArea && state.impactedInstincts.length) {
+    const origin = areasColumn.querySelector(`.area-node.impacted .area-chip`)?.getBoundingClientRect();
+    if (!origin) return;
+    const related = instincts.filter(instinct => state.impactedInstincts.includes(instinct.id));
+    const sourceTotal = origin.height * .58;
+    const sourceBand = sourceTotal / Math.max(related.length, 1);
+    related.forEach((instinct, index) => {
+      const destination = instinctsColumn.querySelector(`[data-instinct-id="${instinct.id}"] .instinct-chip`).getBoundingClientRect();
+      const x1 = origin.right - mapRect.left + 1;
+      const x2 = destination.left - mapRect.left - 1;
+      const y1 = origin.top - mapRect.top + (origin.height - sourceTotal) / 2 + index * sourceBand + sourceBand / 2;
+      const y2 = destination.top - mapRect.top + destination.height / 2;
+      const c1 = x1 + (x2 - x1) * .42;
+      const c2 = x1 + (x2 - x1) * .58;
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", `M ${x1} ${y1} C ${c1} ${y1}, ${c2} ${y2}, ${x2} ${y2}`);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", "#9b9a96");
+      path.setAttribute("stroke-width", Math.max(2.5, sourceBand * .42));
+      path.setAttribute("stroke-dasharray", "5 7");
+      path.setAttribute("stroke-linecap", "round");
+      path.setAttribute("opacity", ".52");
+      path.setAttribute("class", "ribbon lost-ribbon");
+      ribbons.prepend(path);
+    });
+  }
 }
 
 noteInput.addEventListener("input", () => {
-  if (state.selection?.kind !== "area") return;
-  const area = state.areas.find(item => item.id === state.selection.id);
-  if (area) area.note = noteInput.value;
+  state.reflection = noteInput.value;
+  renderAccordionSummaries();
+});
+changedAreaName.addEventListener("input", () => {
+  state.changedAreaName = changedAreaName.value;
+  syncImpactedArea();
+  renderColumns();
+  requestAnimationFrame(drawRibbons);
 });
 
 const dialog = qs("#area-dialog");
@@ -376,18 +561,25 @@ function buildPdf(lines) {
 }
 
 function downloadDiagnosisPdf() {
-  const connected = new Set(state.areas.filter(area => area.active).flatMap(area => area.instincts));
-  const lines = ["Diagnóstico de Áreas e Instintos", `Generado el ${new Intl.DateTimeFormat("es", { dateStyle: "long" }).format(new Date())}`, "", "MAPA DE CONEXIONES", ""];
-  state.areas.forEach(area => {
-    const status = area.active ? "Activa" : "En pausa";
+  const activeAreas = state.areas.filter(area => area.active);
+  const changedArea = state.areas.find(area => area.impacted);
+  const lines = ["Instinct Map · Diagnóstico del cambio", `Generado el ${new Intl.DateTimeFormat("es", { dateStyle: "long" }).format(new Date())}`, ""];
+  if (changedArea) {
+    const impactedNames = state.impactedInstincts.map(id => instincts.find(item => item.id === id)?.name).filter(Boolean);
+    lines.push("LO QUE CAMBIÓ", ...wrapPdfText(changedArea.name), ...wrapPdfText(`Necesidades que alimentaba: ${impactedNames.length ? impactedNames.join(", ") : "No se marcaron conexiones"}`), "");
+  }
+  lines.push("LO QUE SIGUE EN PIE", "");
+  state.areas.filter(area => !area.impacted).forEach(area => {
+    const status = area.active ? "Activa" : "Fuera del mapa actual";
     lines.push(...wrapPdfText(`${area.name} · ${area.type} · ${status}`));
     const names = area.instincts.map(id => instincts.find(item => item.id === id)?.name).filter(Boolean);
     lines.push(...wrapPdfText(`Instintos: ${names.length ? names.join(", ") : "Sin conexiones"}`));
-    if (area.note.trim()) lines.push(...wrapPdfText(`Nota personal: ${area.note.trim()}`));
     lines.push("");
   });
-  const gaps = instincts.filter(item => !connected.has(item.id)).map(item => item.name);
-  lines.push("HUECOS REALES", ...wrapPdfText(gaps.length ? gaps.join(", ") : "Todos los instintos tienen al menos una conexión."), "", "LECTURA", ...wrapPdfText("Este mapa es una fotografía del momento actual. Las líneas muestran qué áreas alimentan cada necesidad; los huecos ayudan a decidir dónde explorar, no son una calificación personal."));
+  const gaps = instincts.filter(item => !isInstinctSupported(item.id, activeAreas)).map(item => item.name);
+  lines.push("HUECOS DESPUÉS DEL CAMBIO", ...wrapPdfText(gaps.length ? gaps.join(", ") : "Todos los instintos conservan al menos una fuente activa."), "");
+  if (state.reflection.trim()) lines.push("TU REFLEXIÓN", ...wrapPdfText(state.reflection.trim()), "");
+  lines.push("LECTURA", ...wrapPdfText("Las líneas grises conservan la forma de lo que cambió; las conexiones activas muestran qué sigue sosteniendo cada necesidad hoy. Los huecos son un punto de partida para la reflexión, no una calificación personal."));
   const url = URL.createObjectURL(buildPdf(lines));
   const anchor = document.createElement("a");
   anchor.href = url; anchor.download = `diagnostico-areas-instintos-${new Date().toISOString().slice(0, 10)}.pdf`;
@@ -408,7 +600,7 @@ qs("#diagnostic-form").addEventListener("submit", async event => {
     countryOrRegion: qs("#region").value.trim() || null,
     rediagnosis: document.querySelector('input[name="rediagnosis"]:checked')?.value === undefined ? null : document.querySelector('input[name="rediagnosis"]:checked').value === "true",
     areas: activeAreas.map(area => ({ type: area.type, instinctIds: [...area.instincts].sort() })),
-    unsupportedInstinctIds: instincts.filter(instinct => !activeAreas.some(area => area.instincts.includes(instinct.id))).map(instinct => instinct.id),
+    unsupportedInstinctIds: instincts.filter(instinct => !isInstinctSupported(instinct.id, activeAreas)).map(instinct => instinct.id),
     turnstileToken: null
   };
   submit.disabled = true;
