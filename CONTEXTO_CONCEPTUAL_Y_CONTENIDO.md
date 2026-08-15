@@ -127,6 +127,7 @@ La introducción y “¿Qué son los instintos?” siempre están visibles. Desp
 - El usuario elimina áreas inactivas, crea las que falten y conecta las activas.
 - “Cómo funciona” se divide en dos columnas: 1–3 y 4–6.
 - El punto 3 aclara que debe crearse la nueva área si la anterior fue reemplazada en lugar de desaparecer.
+- En móvil, la orientación sigue siendo parte conceptual de este paso, pero no una columna permanente: se consulta bajo demanda desde el botón “Orientación”. No debe aparecer durante el paso 02 porque interrumpe la tarea de reconocer la pérdida.
 
 ### 04 — ¿Qué ves en tu mapa?
 
@@ -141,6 +142,8 @@ La introducción y “¿Qué son los instintos?” siempre están visibles. Desp
 - Campos: edad, género, momento de vida, país o región y si es rediagnóstico.
 
 Las secciones abiertas permanecen abiertas. Los títulos sirven para abrir etapas pendientes, no para cerrar las ya realizadas.
+
+La adaptación móvil no cambia el orden conceptual ni convierte la orientación en una etapa adicional: continúa perteneciendo al mapa del paso 03.
 
 ## 6. Interpretación de estados
 
@@ -161,4 +164,3 @@ Las secciones abiertas permanecen abiertas. Los títulos sirven para abrir etapa
 - Marco teórico y límites: `frontend/acerca-de.html`.
 
 Al cambiar un texto, decidir explícitamente si debe actualizarse también en el inspector, el paso 02, el PDF o el marco teórico.
-

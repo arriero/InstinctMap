@@ -27,6 +27,7 @@ Ubicación: `frontend/`.
 - Sistema visual: `frontend/styles.css`.
 - Marco teórico: `frontend/acerca-de.html` y `frontend/acerca-de.css`.
 - Configuración Firebase: `frontend/firebase.json`.
+- `frontend/index.html` carga CSS y JavaScript con un parámetro de versión. El valor vigente es `v=20260815-2`; debe incrementarse cuando cambien esos archivos para invalidar cachés de navegador y CDN.
 - El estado del diagnóstico vive únicamente en memoria. No hay `localStorage`, cuentas ni cookies.
 - El PDF se construye en el navegador sin librerías externas.
 - No se cargan fuentes, scripts, analítica ni recursos de terceros. Esto preserva la afirmación de privacidad del sitio.
@@ -129,6 +130,8 @@ cd /Users/arriero/Documents/Dev/InstinctMap/frontend
 npx firebase-tools@latest deploy --only hosting --project instinctmap-505414
 ```
 
+Último despliegue frontend verificado: 15 de agosto de 2026, después del commit `e2ba064`. Producción entrega `styles.css?v=20260815-2` y `app.js?v=20260815-2`.
+
 La reescritura productiva debe conservar:
 
 ```json
@@ -149,3 +152,5 @@ El backend se construye desde `backend/Dockerfile`. Cloud Run debe escuchar `POR
 5. Verificar escritorio y móvil; el Sankey usa medición DOM y se redibuja con `ResizeObserver`.
 6. No asumir que un deploy de Hosting actualiza Cloud Run: son despliegues independientes.
 7. El inspector móvil del Sankey depende de las clases `mobile-inspector-open` y `is-open`, de los controles `mobile-inspector-toggle` / `mobile-inspector-close` y de un `IntersectionObserver`; no convertirlo de nuevo en una columna fija o una hoja inferior global.
+8. En móvil, el estado cerrado debe conservar `display: none !important`. Ocultarlo solo con `transform` o `visibility` puede dejar una capa fija interceptando la pantalla.
+9. Tras desplegar frontend, comprobar el HTML, CSS y JavaScript públicos con sus URLs versionadas; un “Deploy complete” no demuestra por sí solo que un cliente tenga los tres recursos de la misma versión.

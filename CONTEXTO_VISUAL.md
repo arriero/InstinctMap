@@ -137,6 +137,7 @@ Los colores viven en texto, checkboxes y cintas, no en fondos tintados.
 - Para áreas muestra orientación y ejemplos.
 - Para instintos muestra definición, ingredientes, buen funcionamiento y falla.
 - Construir y Competir incluyen una nota que explica que cualquiera de las dos rutas puede satisfacer Competente.
+- Esta descripción corresponde a escritorio. El patrón móvil equivalente está definido en Responsive y no debe heredar dimensiones o posicionamiento de esta columna.
 
 ## 9. Reflexión y formulario
 
@@ -160,6 +161,8 @@ Los colores viven en texto, checkboxes y cintas, no en fondos tintados.
 - En escritorio, el inspector del Sankey sigue siendo la columna editorial derecha del mapa.
 - Bajo 860 px, el inspector no ocupa espacio dentro del flujo ni puede aparecer mientras la persona está en el paso 2. Solo está disponible dentro del paso 3 mediante el botón “Orientación”.
 - En móvil, “Orientación” abre un cajón flotante desde el borde derecho, de máximo 56% de la altura visible y hasta 88% del ancho. Incluye cierre explícito, se abre al seleccionar un área o instinto y se cierra automáticamente al salir del mapa.
+- Cerrado significa `display: none`, no una superficie trasladada fuera del viewport. Esto evita que una capa invisible intercepte clics o que estilos antiguos la hagan reaparecer.
+- El botón `×` debe cerrar el cajón inmediatamente y devolver `aria-expanded="false"` al botón “Orientación”.
 - La guía “Cómo funciona” pasa de dos columnas a una.
 - Bajo 580 px, grillas de selección reducen columnas y el mapa puede hacer scroll horizontal dentro de su contenedor.
 

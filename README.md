@@ -1,6 +1,14 @@
 # Instinct Map
 
-Aplicación web independiente para crear un diagnóstico visual y anónimo de las áreas de vida y las necesidades psicológicas que alimentan.
+Aplicación web independiente para crear un diagnóstico visual y anónimo de lo que cambia en una transición vital. La persona identifica el área afectada, reconoce qué instintos sostenía y construye un Sankey con las fuentes que siguen activas para ver qué necesidades quedaron sin soporte.
+
+La interfaz usa cinco etapas progresivas:
+
+1. Área que cambió.
+2. Instintos que alimentaba, junto con un ejemplo del resultado.
+3. Mapa actual de áreas e instintos.
+4. Reflexión general.
+5. Descarga del diagnóstico en PDF.
 
 ## Estructura
 
@@ -18,6 +26,13 @@ Aplicación web independiente para crear un diagnóstico visual y anónimo de la
 - Solo se persisten las conexiones y los datos demográficos opcionales definidos por el contrato estricto de la API.
 - El PDF se genera en el navegador; las notas y nombres personales nunca llegan al servidor.
 - Turnstile queda obligatorio automáticamente cuando se configura `TURNSTILE_SECRET`; en desarrollo local puede quedar vacío.
+
+## Interfaz adaptable
+
+- En escritorio, la orientación del Sankey ocupa una columna editorial a la derecha.
+- Bajo 860 px, esa orientación no ocupa espacio permanente: se abre desde el botón `Orientación` como un cajón lateral derecho y puede cerrarse con `×`.
+- El cajón solo está disponible dentro del paso 3, se cierra al salir del mapa y permanece completamente fuera del renderizado mientras está cerrado.
+- El Sankey conserva desplazamiento horizontal en pantallas estrechas.
 
 ## Desarrollo del frontend
 
@@ -80,3 +95,4 @@ La versión está fijada a Quarkus 3.33.3, LTS vigente al iniciar el proyecto en
 - `frontend/firebase.json`: Firebase Hosting con proxy `/api/**` hacia `instinctmap` en `us-east1`.
 - Secret Manager debe exponer `DATABASE_URL` como una URL JDBC completa de Neon.
 - Si el servicio o la región de Cloud Run cambian, actualizar `frontend/firebase.json` antes del despliegue.
+- `frontend/index.html` versiona las URLs de `styles.css` y `app.js`. Cambiar ese identificador cuando una publicación modifique comportamiento o estilos para evitar mezclar recursos antiguos en cachés móviles.
